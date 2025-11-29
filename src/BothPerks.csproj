@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AssemblyName>BothPerks</AssemblyName>
+    <RootNamespace>BothPerks</RootNamespace>
+    <OutputPath>../bin/Win64_Shipping_Client/</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Optimize>true</Optimize>
+    <GameDir Condition="'$(GameDir)'=='' and '$(BANNERLORD_DIR)'!=''">$(BANNERLORD_DIR)\bin\Win64_Shipping_Client</GameDir>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="TaleWorlds.CampaignSystem">
+      <HintPath>$(GameDir)\TaleWorlds.CampaignSystem.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TaleWorlds.Core">
+      <HintPath>$(GameDir)\TaleWorlds.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TaleWorlds.Library">
+      <HintPath>$(GameDir)\TaleWorlds.Library.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TaleWorlds.Localization">
+      <HintPath>$(GameDir)\TaleWorlds.Localization.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TaleWorlds.ObjectSystem">
+      <HintPath>$(GameDir)\TaleWorlds.ObjectSystem.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TaleWorlds.MountAndBlade">
+      <HintPath>$(GameDir)\TaleWorlds.MountAndBlade.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="MCMv5">
+      <HintPath>$(GameDir)\..\..\Modules\Mod Configuration Menu-612-v5-9-1-1689655614\Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\MCMv5.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <Target Name="EnsureGameDir" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="'$(GameDir)'==''" Text="Set GameDir (or environment variable BANNERLORD_DIR) to your Bannerlord bin\Win64_Shipping_Client path." />
+    <Error Condition="!Exists('$(GameDir)')" Text="GameDir '$(GameDir)' does not exist. Set it to your Bannerlord bin\Win64_Shipping_Client path." />
+  </Target>
+</Project>

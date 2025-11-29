@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Module xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/BUTR/Bannerlord.XmlSchemas/master/SubModule.xsd">
+  <Name value="Both Perks" />
+  <Id value="both_perks" />
+  <Version value="v1.0.0" />
+
+  <SingleplayerModule value="true" />
+  <MultiplayerModule value="false" />
+  <DefaultModule value="false" />
+  <ModuleCategory value="Singleplayer" />
+  <ModuleType value="Community" />
+
+  <DependedModules>
+    <DependedModule Id="Native" DependentVersion="v1.3.6" />
+    <DependedModule Id="SandBoxCore" DependentVersion="v1.3.6" />
+    <DependedModule Id="Sandbox" DependentVersion="v1.3.6" />
+    <DependedModule Id="StoryMode" DependentVersion="v1.3.6" />
+    <DependedModule Id="Bannerlord.MBOptionScreen" DependentVersion="v5.9.1" />
+  </DependedModules>
+
+  <!-- Community Dependency Metadata / load order hints -->
+  <DependedModuleMetadatas>
+    <DependedModuleMetadata id="Native" order="LoadBeforeThis" version="v1.3.6.*" />
+    <DependedModuleMetadata id="SandBoxCore" order="LoadBeforeThis" version="v1.3.6.*" />
+    <DependedModuleMetadata id="Sandbox" order="LoadBeforeThis" version="v1.3.6.*" />
+    <DependedModuleMetadata id="StoryMode" order="LoadBeforeThis" version="v1.3.6.*" />
+    <DependedModuleMetadata id="CustomBattle" order="LoadBeforeThis" version="v1.3.6.*" optional="true" />
+    <DependedModuleMetadata id="Bannerlord.MBOptionScreen" order="LoadBeforeThis" version="v5.9.1" />
+    <!-- WarSails / Naval DLC compatibility: load before this mod if present -->
+    <DependedModuleMetadata id="NavalDLC" order="LoadBeforeThis" version="v1.0.2.*" optional="true" />
+  </DependedModuleMetadatas>
+
+  <SubModules>
+    <SubModule>
+      <Name value="Both Perks" />
+      <DLLName value="BothPerks.dll" />
+      <SubModuleClassType value="BothPerks.SubModule" />
+      <Tags>
+        <Tag key="DedicatedServerType" value="none" />
+        <Tag key="IsNoRenderModeElement" value="false" />
+      </Tags>
+    </SubModule>
+  </SubModules>
+
+  <Xmls />
+</Module>

@@ -1,0 +1,7 @@
+F:\SteamLibrary\steamapps\common\Mount & Blade II Bannerlord\Modules\both_perks\src\obj\Release\BothPerks.csproj.AssemblyReference.cache
+F:\SteamLibrary\steamapps\common\Mount & Blade II Bannerlord\Modules\both_perks\src\obj\Release\BothPerks.GeneratedMSBuildEditorConfig.editorconfig
+F:\SteamLibrary\steamapps\common\Mount & Blade II Bannerlord\Modules\both_perks\src\obj\Release\BothPerks.csproj.CoreCompileInputs.cache
+F:\SteamLibrary\steamapps\common\Mount & Blade II Bannerlord\Modules\both_perks\bin\Win64_Shipping_Client\BothPerks.dll
+F:\SteamLibrary\steamapps\common\Mount & Blade II Bannerlord\Modules\both_perks\bin\Win64_Shipping_Client\BothPerks.pdb
+F:\SteamLibrary\steamapps\common\Mount & Blade II Bannerlord\Modules\both_perks\src\obj\Release\BothPerks.dll
+F:\SteamLibrary\steamapps\common\Mount & Blade II Bannerlord\Modules\both_perks\src\obj\Release\BothPerks.pdb
