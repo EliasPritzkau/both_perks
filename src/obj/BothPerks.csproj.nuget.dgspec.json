@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\SteamLibrary\\steamapps\\common\\Mount & Blade II Bannerlord\\Modules\\both_perks\\src\\BothPerks.csproj": {}
+    "F:\\FCode\\MB_Mods\\mods\\both_perks\\both_perks\\src\\BothPerks.csproj": {}
   },
   "projects": {
-    "F:\\SteamLibrary\\steamapps\\common\\Mount & Blade II Bannerlord\\Modules\\both_perks\\src\\BothPerks.csproj": {
+    "F:\\FCode\\MB_Mods\\mods\\both_perks\\both_perks\\src\\BothPerks.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\SteamLibrary\\steamapps\\common\\Mount & Blade II Bannerlord\\Modules\\both_perks\\src\\BothPerks.csproj",
+        "projectUniqueName": "F:\\FCode\\MB_Mods\\mods\\both_perks\\both_perks\\src\\BothPerks.csproj",
         "projectName": "BothPerks",
-        "projectPath": "F:\\SteamLibrary\\steamapps\\common\\Mount & Blade II Bannerlord\\Modules\\both_perks\\src\\BothPerks.csproj",
+        "projectPath": "F:\\FCode\\MB_Mods\\mods\\both_perks\\both_perks\\src\\BothPerks.csproj",
         "packagesPath": "C:\\Users\\Elias\\.nuget\\packages\\",
-        "outputPath": "F:\\SteamLibrary\\steamapps\\common\\Mount & Blade II Bannerlord\\Modules\\both_perks\\src\\obj\\",
+        "outputPath": "F:\\FCode\\MB_Mods\\mods\\both_perks\\both_perks\\src\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
