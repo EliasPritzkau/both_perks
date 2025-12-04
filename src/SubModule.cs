@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.CharacterDevelopment;
+using TaleWorlds.CampaignSystem.GameComponents;
 using TaleWorlds.CampaignSystem.GameState;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
@@ -11,27 +13,99 @@ namespace BothPerks
 {
     public class SubModule : MBSubModuleBase
     {
+        internal static void EnsureXpModel(CampaignGameStarter starter)
+        {
+            if (starter == null)
+            {
+                return;
+            }
+
+            if (starter.Models != null)
+            {
+                foreach (GameModel model in starter.Models)
+                {
+                    if (model is BothPerksXpModel)
+                    {
+                        return;
+                    }
+                }
+            }
+
+            starter.AddModel(new BothPerksXpModel());
+        }
+
+        private static void TryAddBehavior(Game game, object starterObject, string context)
+        {
+            if (!(game.GameType is Campaign))
+            {
+                return;
+            }
+
+            if (starterObject is CampaignGameStarter campaignStarter)
+            {
+                // Ensure we only have a single instance wired into the campaign.
+                campaignStarter.RemoveBehaviors<BothPerksBehavior>();
+                campaignStarter.AddBehavior(new BothPerksBehavior());
+                Debug.Print($"[BothPerks] Behavior attached in {context}.");
+                return;
+            }
+
+            // Fallback: attach directly to the live campaign behavior manager (e.g., saved-game load paths).
+            ICampaignBehaviorManager? manager = Campaign.Current?.CampaignBehaviorManager;
+            if (manager != null)
+            {
+                manager.RemoveBehavior<BothPerksBehavior>();
+                manager.AddBehavior(new BothPerksBehavior());
+                Debug.Print($"[BothPerks] Behavior attached via manager fallback in {context}.");
+            }
+        }
+
+        public override void OnNewGameCreated(Game game, object initializerObject)
+        {
+            base.OnNewGameCreated(game, initializerObject);
+            TryAddBehavior(game, initializerObject, nameof(OnNewGameCreated));
+        }
+
+        public override void OnGameLoaded(Game game, object initializerObject)
+        {
+            base.OnGameLoaded(game, initializerObject);
+            TryAddBehavior(game, initializerObject, nameof(OnGameLoaded));
+            if (initializerObject is CampaignGameStarter starter)
+            {
+                try
+                {
+                    EnsureXpModel(starter);
+                }
+                catch (Exception ex)
+                {
+                    Debug.Print($"[BothPerks] OnGameLoaded.EnsureXpModel failed: {ex}");
+                }
+            }
+        }
+
         protected override void OnGameStart(Game game, IGameStarter gameStarter)
         {
             base.OnGameStart(game, gameStarter);
 
-            if (game.GameType is Campaign && gameStarter is CampaignGameStarter campaignStarter)
-            {
-                campaignStarter.AddBehavior(new BothPerksBehavior());
-            }
+            TryAddBehavior(game, gameStarter, nameof(OnGameStart));
         }
     }
 
     internal sealed class BothPerksBehavior : CampaignBehaviorBase, IGameStateManagerListener
     {
-        private readonly PerkApplicationScope _scope;
+        private const string DoctorsOathStringId = "MedicineDoctorsOath";
 
+        private readonly PerkApplicationScope _scope;
+        private bool _skipDoctorsOath;
         private static Dictionary<SkillObject, PerkObject[]>? _perksBySkill;
+        private static PerkObject? _doctorsOathPerk;
+        private static Action<Hero, PerkObject, bool>? _setPerkValueInternal;
 
         public BothPerksBehavior()
         {
             BothPerksSettings? settings = BothPerksSettings.Instance;
             _scope = settings?.Scope ?? PerkApplicationScope.PlayerFamilyAndCompanions;
+            _skipDoctorsOath = settings?.SkipDoctorsOath ?? false;
         }
 
         public override void RegisterEvents()
@@ -60,9 +134,12 @@ namespace BothPerks
                     return;
                 }
 
+                RefreshSettings();
+                SubModule.EnsureXpModel(starter);
+
                 foreach (Hero hero in Hero.AllAliveHeroes)
                 {
-                    GrantAvailablePerks(hero);
+                    GrantAvailablePerks(hero, settingsRefreshed: true);
                 }
             }, "OnSessionLaunched");
         }
@@ -76,7 +153,9 @@ namespace BothPerks
                     return;
                 }
 
-                GrantAvailablePerks(hero);
+                RefreshSettings();
+
+                GrantAvailablePerks(hero, settingsRefreshed: true);
             }, "OnHeroCreated");
         }
 
@@ -89,7 +168,8 @@ namespace BothPerks
                     return;
                 }
 
-                GrantPerksForSkill(hero, skill);
+                RefreshSettings();
+                GrantPerksForSkill(hero, skill, settingsRefreshed: true);
             }, "OnHeroGainedSkill");
         }
 
@@ -102,6 +182,8 @@ namespace BothPerks
                     return;
                 }
 
+                RefreshSettings();
+
                 if (_scope != PerkApplicationScope.PlayerFamilyAndCompanions &&
                     _scope != PerkApplicationScope.CompanionsAndFamilyOnly)
                 {
@@ -113,7 +195,7 @@ namespace BothPerks
                     return;
                 }
 
-                GrantAvailablePerks(hero);
+                GrantAvailablePerks(hero, settingsRefreshed: true);
             }, "OnNewCompanionAdded");
         }
 
@@ -126,9 +208,10 @@ namespace BothPerks
                     return;
                 }
 
+                RefreshSettings();
+
                 if (_scope == PerkApplicationScope.Disabled ||
-                    _scope == PerkApplicationScope.PlayerOnly ||
-                    _scope == PerkApplicationScope.AllHeroes)
+                    _scope == PerkApplicationScope.PlayerOnly)
                 {
                     return;
                 }
@@ -139,7 +222,7 @@ namespace BothPerks
                     return;
                 }
 
-                GrantAvailablePerks(hero);
+                GrantAvailablePerks(hero, settingsRefreshed: true);
             }, "OnHeroChangedClan");
         }
 
@@ -152,12 +235,25 @@ namespace BothPerks
                     return;
                 }
 
+                RefreshSettings();
+
                 if (_scope == PerkApplicationScope.Disabled || !IsHeroInScope(hero))
                 {
                     return;
                 }
 
+                if (_skipDoctorsOath && IsDoctorsOath(perk))
+                {
+                    RemoveDoctorsOath(hero);
+                    return;
+                }
+
                 PerkObject alternative = perk.AlternativePerk;
+                if (_skipDoctorsOath && IsDoctorsOath(alternative))
+                {
+                    return;
+                }
+
                 if (alternative == null || hero.GetPerkValue(alternative))
                 {
                     return;
@@ -179,12 +275,13 @@ namespace BothPerks
             {
                 if (gameState is CharacterDeveloperState)
                 {
-                    RefreshPlayerClanPerks();
+                    RefreshSettings();
+                    RefreshPlayerClanPerks(settingsRefreshed: true);
                 }
             }, "OnPushState");
         }
 
-        private void RefreshPlayerClanPerks()
+        private void RefreshPlayerClanPerks(bool settingsRefreshed = false)
         {
             if (_scope == PerkApplicationScope.Disabled)
             {
@@ -198,7 +295,7 @@ namespace BothPerks
             if (mainHero != null)
             {
                 processed.Add(mainHero);
-                GrantAvailablePerks(mainHero);
+                GrantAvailablePerks(mainHero, settingsRefreshed);
             }
 
             if (playerClan == null)
@@ -218,7 +315,7 @@ namespace BothPerks
                     continue;
                 }
 
-                GrantAvailablePerks(hero);
+                GrantAvailablePerks(hero, settingsRefreshed);
             }
         }
 
@@ -240,7 +337,7 @@ namespace BothPerks
             }
         }
 
-        private void GrantAvailablePerks(Hero hero)
+        private void GrantAvailablePerks(Hero hero, bool settingsRefreshed = false)
         {
             if (hero == null || hero.HeroDeveloper == null || !hero.IsAlive)
             {
@@ -252,10 +349,21 @@ namespace BothPerks
                 return;
             }
 
+            if (!settingsRefreshed)
+            {
+                RefreshSettings();
+            }
+            RemoveDoctorsOath(hero);
+
             HeroDeveloper developer = hero.HeroDeveloper;
 
             foreach (PerkObject perk in PerkObject.All)
             {
+                if (ShouldSkipDoctorsOath(perk))
+                {
+                    continue;
+                }
+
                 if (perk.Skill == null)
                 {
                     continue;
@@ -273,7 +381,7 @@ namespace BothPerks
             }
         }
 
-        private void GrantPerksForSkill(Hero hero, SkillObject skill)
+        private void GrantPerksForSkill(Hero hero, SkillObject skill, bool settingsRefreshed = false)
         {
             if (hero == null || hero.HeroDeveloper == null || !hero.IsAlive || skill == null)
             {
@@ -284,6 +392,12 @@ namespace BothPerks
             {
                 return;
             }
+
+            if (!settingsRefreshed)
+            {
+                RefreshSettings();
+            }
+            RemoveDoctorsOath(hero);
 
             Dictionary<SkillObject, PerkObject[]> perksBySkill = GetPerksBySkill();
             if (!perksBySkill.TryGetValue(skill, out PerkObject[]? perksForSkill) || perksForSkill.Length == 0)
@@ -296,6 +410,11 @@ namespace BothPerks
 
             foreach (PerkObject perk in perksForSkill)
             {
+                if (ShouldSkipDoctorsOath(perk))
+                {
+                    continue;
+                }
+
                 if (hero.GetPerkValue(perk))
                 {
                     continue;
@@ -342,6 +461,127 @@ namespace BothPerks
             return _perksBySkill;
         }
 
+        private void RefreshSettings()
+        {
+            bool current = BothPerksSettings.Instance?.SkipDoctorsOath ?? false;
+
+            if (current != _skipDoctorsOath)
+            {
+                _skipDoctorsOath = current;
+                if (_skipDoctorsOath)
+                {
+                    RemoveDoctorsOathFromAllInScopeHeroes();
+                }
+            }
+        }
+
+        private void RemoveDoctorsOathFromAllInScopeHeroes()
+        {
+            foreach (Hero hero in Hero.AllAliveHeroes)
+            {
+                if (IsHeroInScope(hero))
+                {
+                    RemoveDoctorsOath(hero);
+                }
+            }
+        }
+
+        private void RemoveDoctorsOath(Hero hero)
+        {
+            if (!_skipDoctorsOath || hero == null)
+            {
+                return;
+            }
+
+            PerkObject? doctorsOath = GetDoctorsOathPerk();
+            if (doctorsOath == null || !hero.GetPerkValue(doctorsOath))
+            {
+                return;
+            }
+
+            Action<Hero, PerkObject, bool>? setter = GetPerkSetter();
+            if (setter == null)
+            {
+                return;
+            }
+
+            try
+            {
+                setter(hero, doctorsOath, false);
+            }
+            catch (Exception ex)
+            {
+                Debug.Print($"[BothPerks] Failed to remove Doctor's Oath from {hero?.Name}: {ex}");
+            }
+        }
+
+        private Action<Hero, PerkObject, bool>? GetPerkSetter()
+        {
+            if (_setPerkValueInternal != null)
+            {
+                return _setPerkValueInternal;
+            }
+
+            MethodInfo? method = typeof(Hero).GetMethod("SetPerkValueInternal", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (method == null)
+            {
+                Debug.Print("[BothPerks] Unable to reflect Hero.SetPerkValueInternal; Doctor's Oath removal disabled.");
+                return null;
+            }
+
+            try
+            {
+                _setPerkValueInternal = (Action<Hero, PerkObject, bool>)Delegate.CreateDelegate(
+                    typeof(Action<Hero, PerkObject, bool>), null, method);
+            }
+            catch (Exception ex)
+            {
+                Debug.Print($"[BothPerks] Failed to bind Hero.SetPerkValueInternal delegate: {ex}");
+                _setPerkValueInternal = null;
+            }
+
+            return _setPerkValueInternal;
+        }
+
+        private static PerkObject? GetDoctorsOathPerk()
+        {
+            if (_doctorsOathPerk != null)
+            {
+                return _doctorsOathPerk;
+            }
+
+            try
+            {
+                _doctorsOathPerk = DefaultPerks.Medicine.DoctorsOath;
+                return _doctorsOathPerk;
+            }
+            catch (Exception)
+            {
+                // Fallback below.
+            }
+
+            foreach (PerkObject perk in PerkObject.All)
+            {
+                if (IsDoctorsOath(perk))
+                {
+                    _doctorsOathPerk = perk;
+                    break;
+                }
+            }
+
+            return _doctorsOathPerk;
+        }
+
+        private bool ShouldSkipDoctorsOath(PerkObject perk)
+        {
+            return _skipDoctorsOath && IsDoctorsOath(perk);
+        }
+
+        private static bool IsDoctorsOath(PerkObject? perk)
+        {
+            return perk != null && perk.StringId == DoctorsOathStringId;
+        }
+
         private bool IsHeroInScope(Hero hero)
         {
             if (hero == null)
@@ -355,6 +595,67 @@ namespace BothPerks
             }
 
             switch (_scope)
+            {
+                case PerkApplicationScope.PlayerOnly:
+                    return hero == Hero.MainHero;
+
+                case PerkApplicationScope.PlayerFamilyAndCompanions:
+                    return hero == Hero.MainHero ||
+                           hero.IsPlayerCompanion ||
+                           hero.Clan == Clan.PlayerClan;
+
+                case PerkApplicationScope.CompanionsAndFamilyOnly:
+                    return hero != Hero.MainHero &&
+                           (hero.IsPlayerCompanion || hero.Clan == Clan.PlayerClan);
+
+                case PerkApplicationScope.AllHeroes:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+    }
+
+    internal sealed class BothPerksXpModel : DefaultGenericXpModel
+    {
+        public override float GetXpMultiplier(Hero hero)
+        {
+            float baseMultiplier = base.GetXpMultiplier(hero);
+
+            BothPerksSettings? settings = BothPerksSettings.Instance;
+            if (settings == null)
+            {
+                return baseMultiplier;
+            }
+
+            if (settings.Scope == PerkApplicationScope.Disabled)
+            {
+                return baseMultiplier;
+            }
+
+            float multiplier = MathF.Max(0.1f, settings.SkillXpMultiplier);
+            if (multiplier <= 1f)
+            {
+                return baseMultiplier;
+            }
+
+            if (!IsHeroInScope(hero, settings.Scope))
+            {
+                return baseMultiplier;
+            }
+
+            return baseMultiplier * multiplier;
+        }
+
+        private static bool IsHeroInScope(Hero hero, PerkApplicationScope scope)
+        {
+            if (hero == null)
+            {
+                return false;
+            }
+
+            switch (scope)
             {
                 case PerkApplicationScope.PlayerOnly:
                     return hero == Hero.MainHero;

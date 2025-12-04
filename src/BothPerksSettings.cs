@@ -38,5 +38,15 @@ namespace BothPerks
                 (int)PerkApplicationScope.PlayerFamilyAndCompanions);
 
         public PerkApplicationScope Scope => ScopeDropdown.SelectedValue;
+
+        [SettingPropertyGroup("General")]
+        [SettingPropertyBool("Skip Doctor's Oath", RequireRestart = false , Order = 1,
+            HintText = "If enabled, Doctor's Oath will not be auto-granted by the mod when assigning both perks.")]
+        public bool SkipDoctorsOath { get; set; }
+
+        [SettingPropertyGroup("General")]
+        [SettingPropertyFloatingInteger("Skill XP Multiplier", 0.1f, 15f, RequireRestart = false, Order = 2,
+            HintText = "Multiplies skill XP gains for in-scope heroes. Set to 1.0 to leave XP unchanged.")]
+        public float SkillXpMultiplier { get; set; } = 1.0f;
     }
 }

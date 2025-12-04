@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>BothPerks</AssemblyName>
     <RootNamespace>BothPerks</RootNamespace>
-    <OutputPath>../bin/Win64_Shipping_Client/</OutputPath>
+    <OutputPath>$(GameDir)\..\..\Modules\both_perks\bin\Win64_Shipping_Client\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Optimize>true</Optimize>
@@ -37,8 +37,16 @@
       <HintPath>$(GameDir)\TaleWorlds.MountAndBlade.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="MCMv5">
+    <Reference Include="MCMv5" Condition="Exists('$(GameDir)\..\..\Modules\Mod Configuration Menu-612-v5-9-1-1689655614\Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\MCMv5.dll')">
       <HintPath>$(GameDir)\..\..\Modules\Mod Configuration Menu-612-v5-9-1-1689655614\Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\MCMv5.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="MCMv5" Condition="Exists('$(GameDir)\..\..\Modules\TEMPDIsabled\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\MCMv5.dll')">
+      <HintPath>$(GameDir)\..\..\Modules\TEMPDIsabled\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\MCMv5.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="MCMv5" Condition="Exists('$(GameDir)\..\..\Modules\TEMPDIsabled\Mod Configuration Menu-612-v5-9-1-1689655614\Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\MCMv5.dll')">
+      <HintPath>$(GameDir)\..\..\Modules\TEMPDIsabled\Mod Configuration Menu-612-v5-9-1-1689655614\Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\MCMv5.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
