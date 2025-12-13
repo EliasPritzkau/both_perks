@@ -1,4 +1,4 @@
 Both Perks grants every in-scope hero both perks they qualify for once they meet the required skill level, so they no longer have to choose between perk branches.
 Applies on campaign load, new hero creation, and skill gains to keep perks in sync.
-Scope is configurable via MCM: Player Only, Player Family and Companions (default), Companions and Family Only, All Heroes, or Disabled.
+Scope is configurable via MCM: Player Only, Player Family and Companions (default), Companions and Family Only, or All Heroes. Behavior dropdown: Manual (double-pick) or Auto (auto + manual fallback).
 No perk data is edited; the mod simply adds missing perks when the requirements are met.
