@@ -380,6 +380,11 @@ namespace BothPerks
                     return;
                 }
 
+                if (selectedPerks == null)
+                {
+                    return;
+                }
+
                 if (selectedPerks.Contains(manualAlternative))
                 {
                     return;
@@ -417,6 +422,11 @@ namespace BothPerks
                         out Func<PerkObject, bool>? getIsPreviousSelected,
                         out bool isAvailable,
                         out Action<PerkVM, PerkVM.PerkStates>? setCurrentState))
+                {
+                    return true;
+                }
+
+                if (getIsPerkSelected == null || getIsPreviousSelected == null || setCurrentState == null)
                 {
                     return true;
                 }
