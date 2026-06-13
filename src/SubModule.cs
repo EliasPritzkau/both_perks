@@ -47,6 +47,7 @@ namespace BothPerks
             if (starterObject is CampaignGameStarter campaignStarter)
             {
                 // Ensure we only have a single instance wired into the campaign.
+                BothPerksBehavior.RemoveStaleGameStateListeners();
                 campaignStarter.RemoveBehaviors<BothPerksBehavior>();
                 campaignStarter.AddBehavior(new BothPerksBehavior());
                 Debug.Print($"[BothPerks] Behavior attached in {context}.");
@@ -57,6 +58,7 @@ namespace BothPerks
             ICampaignBehaviorManager? manager = Campaign.Current?.CampaignBehaviorManager;
             if (manager != null)
             {
+                BothPerksBehavior.RemoveStaleGameStateListeners();
                 manager.RemoveBehavior<BothPerksBehavior>();
                 manager.AddBehavior(new BothPerksBehavior());
                 Debug.Print($"[BothPerks] Behavior attached via manager fallback in {context}.");

@@ -20,6 +20,7 @@ namespace BothPerks
         private bool _autoAssignPerks;
         private bool _skipDoctorsOath;
         private PerkBehaviorMode _mode;
+        private GameStateManager? _registeredGameStateManager;
         private static Dictionary<SkillObject, PerkObject[]>? _perksBySkill;
         private static PerkObject? _doctorsOathPerk;
         private static Action<Hero, PerkObject, bool>? _setPerkValueInternal;
@@ -42,7 +43,9 @@ namespace BothPerks
             CampaignEvents.PerkOpenedEvent.AddNonSerializedListener(this, OnPerkOpened);
 
             // Refresh perks when character UI opens.
-            Game.Current?.GameStateManager?.RegisterListener(this);
+            RemoveStaleGameStateListeners(this);
+            _registeredGameStateManager = Game.Current?.GameStateManager;
+            _registeredGameStateManager?.RegisterListener(this);
         }
 
         public override void SyncData(IDataStore dataStore)
@@ -260,7 +263,34 @@ namespace BothPerks
         public void OnCreateState(GameState gameState) { }
         public void OnPopState(GameState gameState) { }
         public void OnCleanStates() { }
-        public void OnSavedGameLoadFinished() { }
+        public void OnSavedGameLoadFinished()
+        {
+            if (!ReferenceEquals(_registeredGameStateManager, Game.Current?.GameStateManager))
+            {
+                _registeredGameStateManager?.UnregisterListener(this);
+                _registeredGameStateManager = Game.Current?.GameStateManager;
+                _registeredGameStateManager?.RegisterListener(this);
+            }
+        }
+
+        internal static void RemoveStaleGameStateListeners(BothPerksBehavior? keep = null)
+        {
+            GameStateManager? manager = Game.Current?.GameStateManager;
+            if (manager == null)
+            {
+                return;
+            }
+
+            foreach (BothPerksBehavior listener in manager.Listeners.OfType<BothPerksBehavior>().ToList())
+            {
+                if (ReferenceEquals(listener, keep))
+                {
+                    continue;
+                }
+
+                manager.UnregisterListener(listener);
+            }
+        }
 
         private static void SafeRun(Action action, string context)
         {

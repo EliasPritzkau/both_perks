@@ -35,19 +35,158 @@ namespace BothPerks
         }
     }
 
+    internal static class PerkUiAccess
+    {
+        private static bool _selectionRefsUnavailable;
+        private static bool _perkVmRefsUnavailable;
+        private static AccessTools.FieldRef<PerkSelectionVM, List<PerkObject>>? _selectedPerksRef;
+        private static AccessTools.FieldRef<PerkSelectionVM, Action<SkillObject>>? _refreshPerksOfRef;
+        private static AccessTools.FieldRef<PerkSelectionVM, HeroDeveloper>? _developerRef;
+        private static AccessTools.FieldRef<PerkVM, Func<PerkObject, bool>>? _getIsPerkSelectedRef;
+        private static AccessTools.FieldRef<PerkVM, Func<PerkObject, bool>>? _getIsPreviousPerkSelectedRef;
+        private static AccessTools.FieldRef<PerkVM, bool>? _isAvailableRef;
+        private static Action<PerkVM, PerkVM.PerkStates>? _setCurrentStateRef;
+
+        internal static bool TryGetDeveloper(PerkSelectionVM instance, out HeroDeveloper? developer)
+        {
+            developer = null;
+            if (!EnsureSelectionRefs())
+            {
+                return false;
+            }
+
+            developer = _developerRef?.Invoke(instance);
+            return developer != null;
+        }
+
+        internal static bool TryGetSelectedPerks(PerkSelectionVM instance, out List<PerkObject>? selectedPerks)
+        {
+            selectedPerks = null;
+            if (!EnsureSelectionRefs())
+            {
+                return false;
+            }
+
+            selectedPerks = _selectedPerksRef?.Invoke(instance);
+            return selectedPerks != null;
+        }
+
+        internal static Action<SkillObject>? GetRefreshPerksOf(PerkSelectionVM instance)
+        {
+            if (!EnsureSelectionRefs())
+            {
+                return null;
+            }
+
+            return _refreshPerksOfRef?.Invoke(instance);
+        }
+
+        internal static bool TryGetPerkVmAccess(
+            PerkVM instance,
+            out Func<PerkObject, bool>? getIsPerkSelected,
+            out Func<PerkObject, bool>? getIsPreviousPerkSelected,
+            out bool isAvailable,
+            out Action<PerkVM, PerkVM.PerkStates>? setCurrentState)
+        {
+            getIsPerkSelected = null;
+            getIsPreviousPerkSelected = null;
+            isAvailable = false;
+            setCurrentState = null;
+
+            if (!EnsurePerkVmRefs())
+            {
+                return false;
+            }
+
+            getIsPerkSelected = _getIsPerkSelectedRef?.Invoke(instance);
+            getIsPreviousPerkSelected = _getIsPreviousPerkSelectedRef?.Invoke(instance);
+            isAvailable = _isAvailableRef?.Invoke(instance) ?? false;
+            setCurrentState = _setCurrentStateRef;
+            return getIsPerkSelected != null && getIsPreviousPerkSelected != null && setCurrentState != null;
+        }
+
+        internal static bool TryGetIsPerkSelected(PerkVM instance, out Func<PerkObject, bool>? getIsPerkSelected)
+        {
+            getIsPerkSelected = null;
+            if (!EnsurePerkVmRefs())
+            {
+                return false;
+            }
+
+            getIsPerkSelected = _getIsPerkSelectedRef?.Invoke(instance);
+            return getIsPerkSelected != null;
+        }
+
+        private static bool EnsureSelectionRefs()
+        {
+            if (_selectionRefsUnavailable)
+            {
+                return false;
+            }
+
+            if (_selectedPerksRef != null && _refreshPerksOfRef != null && _developerRef != null)
+            {
+                return true;
+            }
+
+            try
+            {
+                _selectedPerksRef = AccessTools.FieldRefAccess<PerkSelectionVM, List<PerkObject>>("_selectedPerks");
+                _refreshPerksOfRef = AccessTools.FieldRefAccess<PerkSelectionVM, Action<SkillObject>>("_refreshPerksOf");
+                _developerRef = AccessTools.FieldRefAccess<PerkSelectionVM, HeroDeveloper>("_developer");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _selectionRefsUnavailable = true;
+                Debug.Print($"[BothPerks] PerkSelectionVM private field access unavailable; UI double-pick helpers disabled: {ex}");
+                return false;
+            }
+        }
+
+        private static bool EnsurePerkVmRefs()
+        {
+            if (_perkVmRefsUnavailable)
+            {
+                return false;
+            }
+
+            if (_getIsPerkSelectedRef != null &&
+                _getIsPreviousPerkSelectedRef != null &&
+                _isAvailableRef != null &&
+                _setCurrentStateRef != null)
+            {
+                return true;
+            }
+
+            try
+            {
+                _getIsPerkSelectedRef = AccessTools.FieldRefAccess<PerkVM, Func<PerkObject, bool>>("_getIsPerkSelected");
+                _getIsPreviousPerkSelectedRef = AccessTools.FieldRefAccess<PerkVM, Func<PerkObject, bool>>("_getIsPreviousPerkSelected");
+                _isAvailableRef = AccessTools.FieldRefAccess<PerkVM, bool>("_isAvailable");
+                _setCurrentStateRef = AccessTools.PropertySetter(typeof(PerkVM), "CurrentState")?
+                    .CreateDelegate(typeof(Action<PerkVM, PerkVM.PerkStates>)) as Action<PerkVM, PerkVM.PerkStates>;
+
+                if (_setCurrentStateRef == null)
+                {
+                    throw new MissingMemberException(typeof(PerkVM).FullName, "CurrentState");
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _perkVmRefsUnavailable = true;
+                Debug.Print($"[BothPerks] PerkVM private field access unavailable; freedom-mode UI helpers disabled: {ex}");
+                return false;
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(PerkSelectionVM), "OnSelectPerk")]
     internal static class PerkSelectionVm_OnSelectPerk_Patch
     {
         private const string DoctorsOathStringId = "MedicineDoctorsOath";
-
-        private static readonly AccessTools.FieldRef<PerkSelectionVM, List<PerkObject>> SelectedPerksRef =
-            AccessTools.FieldRefAccess<PerkSelectionVM, List<PerkObject>>("_selectedPerks");
-
-        private static readonly AccessTools.FieldRef<PerkSelectionVM, Action<SkillObject>> RefreshPerksOfRef =
-            AccessTools.FieldRefAccess<PerkSelectionVM, Action<SkillObject>>("_refreshPerksOf");
-
-        private static readonly AccessTools.FieldRef<PerkSelectionVM, HeroDeveloper> DeveloperRef =
-            AccessTools.FieldRefAccess<PerkSelectionVM, HeroDeveloper>("_developer");
 
         internal struct SelectionState
         {
@@ -115,7 +254,11 @@ namespace BothPerks
                     return;
                 }
 
-                HeroDeveloper developer = DeveloperRef(__instance);
+                if (!PerkUiAccess.TryGetDeveloper(__instance, out HeroDeveloper? developer))
+                {
+                    return;
+                }
+
                 Hero? hero = developer?.Hero;
                 if (hero == null || !IsHeroInScope(hero, settings.Scope))
                 {
@@ -157,7 +300,11 @@ namespace BothPerks
                         return;
                     }
 
-                    HeroDeveloper developer = DeveloperRef(__instance);
+                    if (!PerkUiAccess.TryGetDeveloper(__instance, out HeroDeveloper? developer))
+                    {
+                        return;
+                    }
+
                     Hero? hero = developer?.Hero;
                     if (hero == null || !IsHeroInScope(hero, settings.Scope))
                     {
@@ -186,7 +333,7 @@ namespace BothPerks
                     }
 
                     developer.AddPerk(alternative);
-                    Action<SkillObject> refreshAlt = RefreshPerksOfRef(__instance);
+                    Action<SkillObject>? refreshAlt = PerkUiAccess.GetRefreshPerksOf(__instance);
                     refreshAlt?.Invoke(alternative.Skill);
                     return;
                 }
@@ -212,7 +359,11 @@ namespace BothPerks
                     return;
                 }
 
-                HeroDeveloper manualDeveloper = DeveloperRef(__instance);
+                if (!PerkUiAccess.TryGetDeveloper(__instance, out HeroDeveloper? manualDeveloper))
+                {
+                    return;
+                }
+
                 Hero? manualHero = manualDeveloper?.Hero;
                 if (manualHero == null || !IsHeroInScope(manualHero, settings.Scope))
                 {
@@ -224,7 +375,11 @@ namespace BothPerks
                     return;
                 }
 
-                List<PerkObject> selectedPerks = SelectedPerksRef(__instance);
+                if (!PerkUiAccess.TryGetSelectedPerks(__instance, out List<PerkObject>? selectedPerks))
+                {
+                    return;
+                }
+
                 if (selectedPerks.Contains(manualAlternative))
                 {
                     return;
@@ -233,7 +388,7 @@ namespace BothPerks
                 selectedPerks.Add(manualAlternative);
 
                 // Refresh the UI for this skill so both perks show as selected immediately.
-                Action<SkillObject> refresh = RefreshPerksOfRef(__instance);
+                Action<SkillObject>? refresh = PerkUiAccess.GetRefreshPerksOf(__instance);
                 refresh?.Invoke(selectedPerk.Perk.Skill);
             }
             catch (Exception ex)
@@ -246,19 +401,6 @@ namespace BothPerks
     [HarmonyPatch(typeof(PerkVM), nameof(PerkVM.RefreshState))]
     internal static class PerkVm_RefreshState_Patch
     {
-        private static readonly AccessTools.FieldRef<PerkVM, Func<PerkObject, bool>> GetIsPerkSelectedRef =
-            AccessTools.FieldRefAccess<PerkVM, Func<PerkObject, bool>>("_getIsPerkSelected");
-
-        private static readonly AccessTools.FieldRef<PerkVM, Func<PerkObject, bool>> GetIsPreviousPerkSelectedRef =
-            AccessTools.FieldRefAccess<PerkVM, Func<PerkObject, bool>>("_getIsPreviousPerkSelected");
-
-        private static readonly AccessTools.FieldRef<PerkVM, bool> IsAvailableRef =
-            AccessTools.FieldRefAccess<PerkVM, bool>("_isAvailable");
-
-        private static readonly Action<PerkVM, PerkVM.PerkStates>? SetCurrentStateRef =
-            AccessTools.PropertySetter(typeof(PerkVM), "CurrentState")?
-                .CreateDelegate(typeof(Action<PerkVM, PerkVM.PerkStates>)) as Action<PerkVM, PerkVM.PerkStates>;
-
         public static bool Prefix(PerkVM __instance)
         {
             try
@@ -269,31 +411,32 @@ namespace BothPerks
                     return true;
                 }
 
-                if (SetCurrentStateRef == null)
+                if (!PerkUiAccess.TryGetPerkVmAccess(
+                        __instance,
+                        out Func<PerkObject, bool>? getIsPerkSelected,
+                        out Func<PerkObject, bool>? getIsPreviousSelected,
+                        out bool isAvailable,
+                        out Action<PerkVM, PerkVM.PerkStates>? setCurrentState))
                 {
                     return true;
                 }
 
-                Func<PerkObject, bool>? getIsPerkSelected = GetIsPerkSelectedRef(__instance);
-                Func<PerkObject, bool>? getIsPreviousSelected = GetIsPreviousPerkSelectedRef(__instance);
-
-                bool isAvailable = IsAvailableRef(__instance);
                 bool isSelected = getIsPerkSelected?.Invoke(__instance.Perk) ?? false;
 
                 if (!isAvailable)
                 {
-                    SetCurrentStateRef(__instance, PerkVM.PerkStates.NotEarned);
+                    setCurrentState(__instance, PerkVM.PerkStates.NotEarned);
                     return false;
                 }
 
                 if (isSelected)
                 {
-                    SetCurrentStateRef(__instance, PerkVM.PerkStates.EarnedAndActive);
+                    setCurrentState(__instance, PerkVM.PerkStates.EarnedAndActive);
                     return false;
                 }
 
                 bool previousSelected = getIsPreviousSelected?.Invoke(__instance.Perk) ?? false;
-                SetCurrentStateRef(__instance, previousSelected
+                setCurrentState(__instance, previousSelected
                     ? PerkVM.PerkStates.EarnedButNotSelected
                     : PerkVM.PerkStates.EarnedPreviousPerkNotSelected);
 
@@ -310,9 +453,6 @@ namespace BothPerks
     [HarmonyPatch(typeof(PerkVM), "get__hasAlternativeAndSelected")]
     internal static class PerkVm_HasAlternativeSelected_Patch
     {
-        private static readonly AccessTools.FieldRef<PerkVM, Func<PerkObject, bool>> GetIsPerkSelectedRef =
-            AccessTools.FieldRefAccess<PerkVM, Func<PerkObject, bool>>("_getIsPerkSelected");
-
         private static bool IsHeroInScope(Hero hero, PerkApplicationScope scope)
         {
             if (hero == null)
@@ -344,7 +484,11 @@ namespace BothPerks
                     return true;
                 }
 
-                Func<PerkObject, bool>? getIsPerkSelected = GetIsPerkSelectedRef(__instance);
+                if (!PerkUiAccess.TryGetIsPerkSelected(__instance, out Func<PerkObject, bool>? getIsPerkSelected))
+                {
+                    return true;
+                }
+
                 object? target = getIsPerkSelected?.Target;
                 Hero? hero = (target as HeroDeveloper)?.Hero;
 
