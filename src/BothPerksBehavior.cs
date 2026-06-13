@@ -201,8 +201,8 @@ namespace BothPerks
                 }
 
                 developer.AddPerk(alternative);
-                // Let listeners (including the character UI) know the alternative perk was granted.
-                CampaignEventDispatcher.Instance?.OnPerkOpened(hero, alternative);
+                // developer.AddPerk(alternative) should handle the event firing implicitly.
+                // CampaignEventDispatcher.Instance?.OnPerkOpened(hero, alternative);
             }, "OnPerkOpened");
         }
 

@@ -6,3 +6,11 @@ F:\SteamLibrary\steamapps\common\Mount & Blade II Bannerlord\Modules\both_perks\
 F:\SteamLibrary\steamapps\common\Mount & Blade II Bannerlord\Modules\both_perks\bin\Win64_Shipping_Client\BothPerks.pdb
 F:\FCode\MB_Mods\mods\both_perks\both_perks\src\obj\Release\BothPerks.dll
 F:\FCode\MB_Mods\mods\both_perks\both_perks\src\obj\Release\BothPerks.pdb
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\src\obj\Release\BothPerks.csproj.AssemblyReference.cache
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\src\obj\Release\BothPerks.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\src\obj\Release\BothPerks.csproj.CoreCompileInputs.cache
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\src\obj\Release\BothPerks.sourcelink.json
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\src\obj\Release\BothPerks.dll
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\src\obj\Release\BothPerks.pdb
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\bin\Win64_Shipping_Client\BothPerks.dll
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\bin\Win64_Shipping_Client\BothPerks.pdb

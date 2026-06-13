@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "LUfLgu2q2SY=",
+  "dgSpecHash": "Dcdhut59mz4=",
   "success": true,
-  "projectFilePath": "F:\\FCode\\MB_Mods\\mods\\both_perks\\both_perks\\src\\BothPerks.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\Elias\\Nextcloud\\Code\\FCode\\MB_Mods\\mods\\both_perks\\both_perks\\src\\BothPerks.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Elias\\.nuget\\packages\\microsoft.netframework.referenceassemblies\\1.0.3\\microsoft.netframework.referenceassemblies.1.0.3.nupkg.sha512",
+    "C:\\Users\\Elias\\.nuget\\packages\\microsoft.netframework.referenceassemblies.net472\\1.0.3\\microsoft.netframework.referenceassemblies.net472.1.0.3.nupkg.sha512"
+  ],
   "logs": []
 }

@@ -5,11 +5,14 @@
     <Nullable>enable</Nullable>
     <AssemblyName>BothPerks</AssemblyName>
     <RootNamespace>BothPerks</RootNamespace>
-    <OutputPath>$(GameDir)\..\..\Modules\both_perks\bin\Win64_Shipping_Client\</OutputPath>
+    <OutputPath>$(MSBuildThisFileDirectory)..\bin\Win64_Shipping_Client\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Optimize>true</Optimize>
-    <GameDir Condition="'$(GameDir)'=='' and '$(BANNERLORD_DIR)'!=''">$(BANNERLORD_DIR)\bin\Win64_Shipping_Client</GameDir>
+    <BannerlordRoot Condition="'$(BannerlordRoot)'=='' and '$(BANNERLORD_ROOT)'!=''">$(BANNERLORD_ROOT)</BannerlordRoot>
+    <BannerlordRoot Condition="'$(BannerlordRoot)'==''">D:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord</BannerlordRoot>
+    <GameDir Condition="'$(GameDir)'==''">$(BannerlordRoot)\bin\Win64_Shipping_Client</GameDir>
+    <WorkshopDir Condition="'$(WorkshopDir)'==''">D:\SteamLibrary\steamapps\workshop\content\261550</WorkshopDir>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
@@ -53,6 +56,10 @@
       <HintPath>$(GameDir)\..\..\Modules\TEMPDIsabled\\Harmony-2006-v2-4-2-225-1764271270\\Modules\\Bannerlord.Harmony\\bin\\Win64_Shipping_Client\\0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="0Harmony" Condition="Exists('$(WorkshopDir)\2859188632\bin\Win64_Shipping_Client\0Harmony.dll')">
+      <HintPath>$(WorkshopDir)\2859188632\bin\Win64_Shipping_Client\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="MCMv5" Condition="Exists('$(GameDir)\..\..\Modules\Mod Configuration Menu-612-v5-9-1-1689655614\Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\MCMv5.dll')">
       <HintPath>$(GameDir)\..\..\Modules\Mod Configuration Menu-612-v5-9-1-1689655614\Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\MCMv5.dll</HintPath>
       <Private>false</Private>
@@ -63,6 +70,10 @@
     </Reference>
     <Reference Include="MCMv5" Condition="Exists('$(GameDir)\..\..\Modules\TEMPDIsabled\Mod Configuration Menu-612-v5-9-1-1689655614\Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\MCMv5.dll')">
       <HintPath>$(GameDir)\..\..\Modules\TEMPDIsabled\Mod Configuration Menu-612-v5-9-1-1689655614\Modules\Bannerlord.MBOptionScreen\bin\Win64_Shipping_Client\MCMv5.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="MCMv5" Condition="Exists('$(WorkshopDir)\2859238197\bin\Win64_Shipping_Client\MCMv5.dll')">
+      <HintPath>$(WorkshopDir)\2859238197\bin\Win64_Shipping_Client\MCMv5.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>

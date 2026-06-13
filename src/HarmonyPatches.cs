@@ -255,9 +255,6 @@ namespace BothPerks
         private static readonly AccessTools.FieldRef<PerkVM, bool> IsAvailableRef =
             AccessTools.FieldRefAccess<PerkVM, bool>("_isAvailable");
 
-        private static readonly AccessTools.FieldRef<PerkVM, bool> IsInSelectionRef =
-            AccessTools.FieldRefAccess<PerkVM, bool>("_isInSelection");
-
         private static readonly Action<PerkVM, PerkVM.PerkStates>? SetCurrentStateRef =
             AccessTools.PropertySetter(typeof(PerkVM), "CurrentState")?
                 .CreateDelegate(typeof(Action<PerkVM, PerkVM.PerkStates>)) as Action<PerkVM, PerkVM.PerkStates>;
@@ -281,18 +278,11 @@ namespace BothPerks
                 Func<PerkObject, bool>? getIsPreviousSelected = GetIsPreviousPerkSelectedRef(__instance);
 
                 bool isAvailable = IsAvailableRef(__instance);
-                bool isInSelection = IsInSelectionRef(__instance);
                 bool isSelected = getIsPerkSelected?.Invoke(__instance.Perk) ?? false;
 
                 if (!isAvailable)
                 {
                     SetCurrentStateRef(__instance, PerkVM.PerkStates.NotEarned);
-                    return false;
-                }
-
-                if (isInSelection)
-                {
-                    SetCurrentStateRef(__instance, PerkVM.PerkStates.InSelection);
                     return false;
                 }
 
