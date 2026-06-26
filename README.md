@@ -6,7 +6,21 @@ Relevant parts of this repo:
 - `SubModule.xml` – module metadata.
 - `src/` – C# source code and project file.
 
-Build the mod by opening `src/BothPerks.csproj` in your C# IDE or building it with `dotnet build`, then use the resulting DLL in the module `bin` folder.
+Build the mod with:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\BuildBothPerks.ps1
+```
+
+Runtime layout:
+
+```text
+bin/Win64_Shipping_Client/BothPerks.Bootstrap.dll
+bin/Win64_Shipping_Client/compat/v1_2/BothPerks.Core.dll
+bin/Win64_Shipping_Client/compat/v1_3/BothPerks.Core.dll
+```
+
+The bootstrap loads `v1_2` for Bannerlord 1.2.x and `v1_3` for 1.3+.
  
 What the mod does:
 - Gives heroes all perks they qualify for based on skill level, so they effectively get both perks in each skill tree.
@@ -30,4 +44,8 @@ Settings (in MCM):
   - XP model: both_perks/src/BothPerksXpModel.cs multiplies skill XP for in-scope heroes based on settings; injected by both_perks/src/SubModule.cs, which also attaches the campaign behavior and applies Harmony patches at load.
   - Docs/meta: both_perks/src/DESCRIPTION.txt (mod summary), extra_info/.tasks.md and extra_info/AGENTS.md (repo guidelines: don’t edit MBSource/Archive; target BL 1.3.6; MCM allowed).
 
-  Want me to check the compiled output in both_perks/bin, review the Backup folder, or run a build to verify it compiles?
+Clean Workshop packages are built from the parent mods folder with:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\BuildReleases.ps1 -ModName BothPerks
+```

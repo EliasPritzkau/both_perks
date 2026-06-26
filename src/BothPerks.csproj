@@ -3,9 +3,11 @@
     <TargetFramework>net472</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <AssemblyName>BothPerks</AssemblyName>
+    <AssemblyName>BothPerks.Core</AssemblyName>
     <RootNamespace>BothPerks</RootNamespace>
-    <OutputPath>$(MSBuildThisFileDirectory)..\bin\Win64_Shipping_Client\</OutputPath>
+    <BannerlordTarget Condition="'$(BannerlordTarget)'==''">v1_3</BannerlordTarget>
+    <DefineConstants Condition="'$(BannerlordTarget)'=='v1_2'">$(DefineConstants);BANNERLORD_V12</DefineConstants>
+    <OutputPath>$(MSBuildThisFileDirectory)..\bin\Win64_Shipping_Client\compat\$(BannerlordTarget)\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Optimize>true</Optimize>
@@ -15,6 +17,9 @@
     <WorkshopDir Condition="'$(WorkshopDir)'==''">D:\SteamLibrary\steamapps\workshop\content\261550</WorkshopDir>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Bootstrap\**\*.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="TaleWorlds.CampaignSystem">
       <HintPath>$(GameDir)\TaleWorlds.CampaignSystem.dll</HintPath>
@@ -80,5 +85,9 @@
   <Target Name="EnsureGameDir" BeforeTargets="ResolveAssemblyReferences">
     <Error Condition="'$(GameDir)'==''" Text="Set GameDir (or environment variable BANNERLORD_DIR) to your Bannerlord bin\Win64_Shipping_Client path." />
     <Error Condition="!Exists('$(GameDir)')" Text="GameDir '$(GameDir)' does not exist. Set it to your Bannerlord bin\Win64_Shipping_Client path." />
+  </Target>
+  <Target Name="ValidateBannerlordTarget" BeforeTargets="BeforeBuild">
+    <Error Condition="'$(BannerlordTarget)'!='v1_2' and '$(BannerlordTarget)'!='v1_3' and '$(BannerlordTarget)'!='v1_4'"
+           Text="BannerlordTarget must be v1_2, v1_3, or v1_4." />
   </Target>
 </Project>

@@ -63,7 +63,7 @@ namespace BothPerks
                     return;
                 }
 
-                SubModule.EnsureXpModel(starter);
+                CoreModule.EnsureXpModel(starter);
 
                 foreach (Hero hero in Hero.AllAliveHeroes)
                 {
@@ -197,7 +197,7 @@ namespace BothPerks
                     return;
                 }
 
-                HeroDeveloper developer = hero.HeroDeveloper;
+                var developer = hero.HeroDeveloper;
                 if (developer == null)
                 {
                     return;
@@ -327,7 +327,7 @@ namespace BothPerks
             }
             RemoveDoctorsOath(hero);
 
-            HeroDeveloper developer = hero.HeroDeveloper;
+            var developer = hero.HeroDeveloper;
 
             foreach (PerkObject perk in PerkObject.All)
             {
@@ -382,7 +382,7 @@ namespace BothPerks
                 return;
             }
 
-            HeroDeveloper developer = hero.HeroDeveloper;
+            var developer = hero.HeroDeveloper;
             int heroSkillValue = hero.GetSkillValue(skill);
 
             foreach (PerkObject perk in perksForSkill)

@@ -1,0 +1,8 @@
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\bin\Win64_Shipping_Client\BothPerks.Bootstrap.dll
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\bin\Win64_Shipping_Client\BothPerks.Bootstrap.pdb
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\src\Bootstrap\obj\Release\BothPerks.Bootstrap.csproj.AssemblyReference.cache
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\src\Bootstrap\obj\Release\BothPerks.Bootstrap.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\src\Bootstrap\obj\Release\BothPerks.Bootstrap.csproj.CoreCompileInputs.cache
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\src\Bootstrap\obj\Release\BothPerks.Bootstrap.sourcelink.json
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\src\Bootstrap\obj\Release\BothPerks.Bootstrap.dll
+C:\Users\Elias\Nextcloud\Code\FCode\MB_Mods\mods\both_perks\both_perks\src\Bootstrap\obj\Release\BothPerks.Bootstrap.pdb

@@ -1,7 +1,7 @@
 {
-  "version": 3,
+  "version": 4,
   "targets": {
-    ".NETFramework,Version=v4.7.2": {
+    "net472": {
       "Microsoft.NETFramework.ReferenceAssemblies/1.0.3": {
         "type": "package",
         "dependencies": {
@@ -410,7 +410,7 @@
     }
   },
   "projectFileDependencyGroups": {
-    ".NETFramework,Version=v4.7.2": [
+    "net472": [
       "Microsoft.NETFramework.ReferenceAssemblies >= 1.0.3"
     ]
   },
@@ -421,7 +421,7 @@
     "version": "1.0.0",
     "restore": {
       "projectUniqueName": "C:\\Users\\Elias\\Nextcloud\\Code\\FCode\\MB_Mods\\mods\\both_perks\\both_perks\\src\\BothPerks.csproj",
-      "projectName": "BothPerks",
+      "projectName": "BothPerks.Core",
       "projectPath": "C:\\Users\\Elias\\Nextcloud\\Code\\FCode\\MB_Mods\\mods\\both_perks\\both_perks\\src\\BothPerks.csproj",
       "packagesPath": "C:\\Users\\Elias\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\Elias\\Nextcloud\\Code\\FCode\\MB_Mods\\mods\\both_perks\\both_perks\\src\\obj\\",
@@ -437,6 +437,7 @@
       },
       "frameworks": {
         "net472": {
+          "framework": "net472",
           "targetAlias": "net472",
           "projectReferences": {}
         }
@@ -451,10 +452,11 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "10.0.200"
+      "SdkAnalysisLevel": "10.0.300"
     },
     "frameworks": {
       "net472": {
+        "framework": "net472",
         "targetAlias": "net472",
         "dependencies": {
           "Microsoft.NETFramework.ReferenceAssemblies": {
@@ -464,7 +466,7 @@
             "autoReferenced": true
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.203\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301\\RuntimeIdentifierGraph.json"
       }
     }
   }

@@ -7,12 +7,10 @@ using TaleWorlds.MountAndBlade;
 
 namespace BothPerks
 {
-    public class SubModule : MBSubModuleBase
+    public sealed class CoreModule
     {
-        protected override void OnSubModuleLoad()
+        public void OnSubModuleLoad()
         {
-            base.OnSubModuleLoad();
-
             HarmonyPatcher.ApplyPatches();
         }
 
@@ -65,15 +63,13 @@ namespace BothPerks
             }
         }
 
-        public override void OnNewGameCreated(Game game, object initializerObject)
+        public void OnNewGameCreated(Game game, object initializerObject)
         {
-            base.OnNewGameCreated(game, initializerObject);
             TryAddBehavior(game, initializerObject, nameof(OnNewGameCreated));
         }
 
-        public override void OnGameLoaded(Game game, object initializerObject)
+        public void OnGameLoaded(Game game, object initializerObject)
         {
-            base.OnGameLoaded(game, initializerObject);
             TryAddBehavior(game, initializerObject, nameof(OnGameLoaded));
             if (initializerObject is CampaignGameStarter starter)
             {
@@ -88,10 +84,8 @@ namespace BothPerks
             }
         }
 
-        protected override void OnGameStart(Game game, IGameStarter gameStarter)
+        public void OnGameStart(Game game, IGameStarter gameStarter)
         {
-            base.OnGameStart(game, gameStarter);
-
             TryAddBehavior(game, gameStarter, nameof(OnGameStart));
         }
     }

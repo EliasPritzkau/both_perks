@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using HarmonyLib;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.CharacterDevelopment;
@@ -41,13 +42,13 @@ namespace BothPerks
         private static bool _perkVmRefsUnavailable;
         private static AccessTools.FieldRef<PerkSelectionVM, List<PerkObject>>? _selectedPerksRef;
         private static AccessTools.FieldRef<PerkSelectionVM, Action<SkillObject>>? _refreshPerksOfRef;
-        private static AccessTools.FieldRef<PerkSelectionVM, HeroDeveloper>? _developerRef;
+        private static FieldInfo? _developerField;
         private static AccessTools.FieldRef<PerkVM, Func<PerkObject, bool>>? _getIsPerkSelectedRef;
         private static AccessTools.FieldRef<PerkVM, Func<PerkObject, bool>>? _getIsPreviousPerkSelectedRef;
         private static AccessTools.FieldRef<PerkVM, bool>? _isAvailableRef;
         private static Action<PerkVM, PerkVM.PerkStates>? _setCurrentStateRef;
 
-        internal static bool TryGetDeveloper(PerkSelectionVM instance, out HeroDeveloper? developer)
+        internal static bool TryGetDeveloper(PerkSelectionVM instance, out object? developer)
         {
             developer = null;
             if (!EnsureSelectionRefs())
@@ -55,8 +56,18 @@ namespace BothPerks
                 return false;
             }
 
-            developer = _developerRef?.Invoke(instance);
+            developer = _developerField?.GetValue(instance);
             return developer != null;
+        }
+
+        internal static Hero? GetDeveloperHero(object? developer)
+        {
+            return developer?.GetType().GetProperty("Hero")?.GetValue(developer, null) as Hero;
+        }
+
+        internal static void AddPerk(object developer, PerkObject perk)
+        {
+            developer.GetType().GetMethod("AddPerk", new[] { typeof(PerkObject) })?.Invoke(developer, new object[] { perk });
         }
 
         internal static bool TryGetSelectedPerks(PerkSelectionVM instance, out List<PerkObject>? selectedPerks)
@@ -124,7 +135,7 @@ namespace BothPerks
                 return false;
             }
 
-            if (_selectedPerksRef != null && _refreshPerksOfRef != null && _developerRef != null)
+            if (_selectedPerksRef != null && _refreshPerksOfRef != null && _developerField != null)
             {
                 return true;
             }
@@ -133,7 +144,11 @@ namespace BothPerks
             {
                 _selectedPerksRef = AccessTools.FieldRefAccess<PerkSelectionVM, List<PerkObject>>("_selectedPerks");
                 _refreshPerksOfRef = AccessTools.FieldRefAccess<PerkSelectionVM, Action<SkillObject>>("_refreshPerksOf");
-                _developerRef = AccessTools.FieldRefAccess<PerkSelectionVM, HeroDeveloper>("_developer");
+                _developerField = AccessTools.Field(typeof(PerkSelectionVM), "_developer");
+                if (_developerField == null)
+                {
+                    throw new MissingFieldException(typeof(PerkSelectionVM).FullName, "_developer");
+                }
                 return true;
             }
             catch (Exception ex)
@@ -183,7 +198,7 @@ namespace BothPerks
         }
     }
 
-    [HarmonyPatch(typeof(PerkSelectionVM), "OnSelectPerk")]
+    [HarmonyPatch(typeof(PerkSelectionVM), "OnSelectPerk", new Type[] { typeof(PerkSelectionItemVM) })]
     internal static class PerkSelectionVm_OnSelectPerk_Patch
     {
         private const string DoctorsOathStringId = "MedicineDoctorsOath";
@@ -237,9 +252,9 @@ namespace BothPerks
             };
         }
 
-        public static void Prefix(PerkSelectionItemVM selectedPerk, PerkSelectionVM __instance, out SelectionState __state)
+        internal static void BeforeSelect(PerkObject? selectedPerk, PerkSelectionVM instance, out SelectionState state)
         {
-            __state = default;
+            state = default;
 
             try
             {
@@ -249,31 +264,35 @@ namespace BothPerks
                     return;
                 }
 
-                if (settings.BehaviorMode != PerkBehaviorMode.Freedom || selectedPerk?.Perk == null)
+                if (settings.BehaviorMode != PerkBehaviorMode.Freedom || selectedPerk == null)
                 {
                     return;
                 }
 
-                if (!PerkUiAccess.TryGetDeveloper(__instance, out HeroDeveloper? developer))
+                if (!PerkUiAccess.TryGetDeveloper(instance, out object? developer))
                 {
                     return;
                 }
 
-                Hero? hero = developer?.Hero;
+                Hero? hero = PerkUiAccess.GetDeveloperHero(developer);
                 if (hero == null || !IsHeroInScope(hero, settings.Scope))
                 {
                     return;
                 }
 
-                PerkObject? alternative = selectedPerk.Perk.AlternativePerk;
+                PerkObject? alternative = selectedPerk.AlternativePerk;
                 if (alternative == null)
                 {
                     return;
                 }
 
-                __state.IsFreedomMode = true;
-                __state.Alternative = alternative;
-                __state.AlternativeWasSelected = hero.GetPerkValue(alternative);
+                bool alternativeIsPending = PerkUiAccess.TryGetSelectedPerks(instance, out List<PerkObject>? selectedPerks) &&
+                                            selectedPerks != null &&
+                                            selectedPerks.Contains(alternative);
+
+                state.IsFreedomMode = true;
+                state.Alternative = alternative;
+                state.AlternativeWasSelected = hero.GetPerkValue(alternative) || alternativeIsPending;
             }
             catch (Exception ex)
             {
@@ -281,31 +300,31 @@ namespace BothPerks
             }
         }
 
-        public static void Postfix(PerkSelectionItemVM selectedPerk, PerkSelectionVM __instance, SelectionState __state)
+        internal static void AfterSelect(PerkObject? selectedPerk, PerkSelectionVM instance, SelectionState state)
         {
             try
             {
                 BothPerksSettings? settings = BothPerksSettings.Instance;
-                if (settings == null || selectedPerk?.Perk == null)
+                if (settings == null || selectedPerk == null)
                 {
                     return;
                 }
 
-                if (__state.IsFreedomMode)
+                if (state.IsFreedomMode)
                 {
                     // If the game unselected the alternative during this pick, restore it so both stay selected.
-                    PerkObject? alternative = __state.Alternative;
+                    PerkObject? alternative = state.Alternative;
                     if (alternative == null)
                     {
                         return;
                     }
 
-                    if (!PerkUiAccess.TryGetDeveloper(__instance, out HeroDeveloper? developer))
+                    if (!PerkUiAccess.TryGetDeveloper(instance, out object? developer))
                     {
                         return;
                     }
 
-                    Hero? hero = developer?.Hero;
+                    Hero? hero = PerkUiAccess.GetDeveloperHero(developer);
                     if (hero == null || !IsHeroInScope(hero, settings.Scope))
                     {
                         return;
@@ -316,7 +335,7 @@ namespace BothPerks
                         return;
                     }
 
-                    if (!__state.AlternativeWasSelected)
+                    if (!state.AlternativeWasSelected)
                     {
                         return;
                     }
@@ -332,8 +351,8 @@ namespace BothPerks
                         return;
                     }
 
-                    developer.AddPerk(alternative);
-                    Action<SkillObject>? refreshAlt = PerkUiAccess.GetRefreshPerksOf(__instance);
+                    PerkUiAccess.AddPerk(developer, alternative);
+                    Action<SkillObject>? refreshAlt = PerkUiAccess.GetRefreshPerksOf(instance);
                     refreshAlt?.Invoke(alternative.Skill);
                     return;
                 }
@@ -343,28 +362,23 @@ namespace BothPerks
                     return;
                 }
 
-                if (selectedPerk?.Perk == null)
-                {
-                    return;
-                }
-
-                PerkObject? manualAlternative = selectedPerk.Perk.AlternativePerk;
+                PerkObject? manualAlternative = selectedPerk.AlternativePerk;
                 if (manualAlternative == null)
                 {
                     return;
                 }
 
-                if (settings.SkipDoctorsOath && (IsDoctorsOath(selectedPerk.Perk) || IsDoctorsOath(manualAlternative)))
+                if (settings.SkipDoctorsOath && (IsDoctorsOath(selectedPerk) || IsDoctorsOath(manualAlternative)))
                 {
                     return;
                 }
 
-                if (!PerkUiAccess.TryGetDeveloper(__instance, out HeroDeveloper? manualDeveloper))
+                if (!PerkUiAccess.TryGetDeveloper(instance, out object? manualDeveloper))
                 {
                     return;
                 }
 
-                Hero? manualHero = manualDeveloper?.Hero;
+                Hero? manualHero = PerkUiAccess.GetDeveloperHero(manualDeveloper);
                 if (manualHero == null || !IsHeroInScope(manualHero, settings.Scope))
                 {
                     return;
@@ -375,7 +389,7 @@ namespace BothPerks
                     return;
                 }
 
-                if (!PerkUiAccess.TryGetSelectedPerks(__instance, out List<PerkObject>? selectedPerks))
+                if (!PerkUiAccess.TryGetSelectedPerks(instance, out List<PerkObject>? selectedPerks))
                 {
                     return;
                 }
@@ -393,13 +407,47 @@ namespace BothPerks
                 selectedPerks.Add(manualAlternative);
 
                 // Refresh the UI for this skill so both perks show as selected immediately.
-                Action<SkillObject>? refresh = PerkUiAccess.GetRefreshPerksOf(__instance);
-                refresh?.Invoke(selectedPerk.Perk.Skill);
+                Action<SkillObject>? refresh = PerkUiAccess.GetRefreshPerksOf(instance);
+                refresh?.Invoke(selectedPerk.Skill);
             }
             catch (Exception ex)
             {
                 Debug.Print($"[BothPerks] PerkSelectionVM.OnSelectPerk postfix failed: {ex}");
             }
+        }
+
+        public static void Prefix(PerkSelectionItemVM selectedPerk, PerkSelectionVM __instance, out SelectionState __state)
+        {
+            BeforeSelect(selectedPerk?.Perk, __instance, out __state);
+        }
+
+        public static void Postfix(PerkSelectionItemVM selectedPerk, PerkSelectionVM __instance, SelectionState __state)
+        {
+            AfterSelect(selectedPerk?.Perk, __instance, __state);
+        }
+    }
+
+    [HarmonyPatch]
+    internal static class PerkSelectionVm_OnSelectPerkVm_Patch
+    {
+        public static bool Prepare()
+        {
+            return TargetMethod() != null;
+        }
+
+        public static MethodBase? TargetMethod()
+        {
+            return AccessTools.Method(typeof(PerkSelectionVM), "OnSelectPerk", new Type[] { typeof(PerkVM) });
+        }
+
+        public static void Prefix(PerkVM selectedPerk, PerkSelectionVM __instance, out PerkSelectionVm_OnSelectPerk_Patch.SelectionState __state)
+        {
+            PerkSelectionVm_OnSelectPerk_Patch.BeforeSelect(selectedPerk?.Perk, __instance, out __state);
+        }
+
+        public static void Postfix(PerkVM selectedPerk, PerkSelectionVM __instance, PerkSelectionVm_OnSelectPerk_Patch.SelectionState __state)
+        {
+            PerkSelectionVm_OnSelectPerk_Patch.AfterSelect(selectedPerk?.Perk, __instance, __state);
         }
     }
 
@@ -500,7 +548,7 @@ namespace BothPerks
                 }
 
                 object? target = getIsPerkSelected?.Target;
-                Hero? hero = (target as HeroDeveloper)?.Hero;
+                Hero? hero = PerkUiAccess.GetDeveloperHero(target);
 
                 if (hero != null && !IsHeroInScope(hero, settings.Scope))
                 {

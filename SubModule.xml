@@ -12,36 +12,36 @@
   <ModuleType value="Community" />
 
   <DependedModules>
-    <DependedModule Id="Native" DependentVersion="v1.4.6" />
-    <DependedModule Id="SandBoxCore" DependentVersion="v1.4.6" />
-    <DependedModule Id="Sandbox" DependentVersion="v1.4.6" />
-    <DependedModule Id="StoryMode" DependentVersion="v1.4.6" />
-    <DependedModule Id="Bannerlord.Harmony" DependentVersion="v2.4.2.0" />
-    <DependedModule Id="Bannerlord.ButterLib" DependentVersion="v2.10.4" />
-    <DependedModule Id="Bannerlord.UIExtenderEx" DependentVersion="v2.13.2" />
-    <DependedModule Id="Bannerlord.MBOptionScreen" DependentVersion="v5.11.4" />
+    <DependedModule Id="Native" />
+    <DependedModule Id="SandBoxCore" />
+    <DependedModule Id="Sandbox" />
+    <DependedModule Id="StoryMode" />
+    <DependedModule Id="Bannerlord.Harmony" />
+    <DependedModule Id="Bannerlord.ButterLib" />
+    <DependedModule Id="Bannerlord.UIExtenderEx" />
+    <DependedModule Id="Bannerlord.MBOptionScreen" />
   </DependedModules>
 
   <!-- Community Dependency Metadata / load order hints -->
   <DependedModuleMetadatas>
-    <DependedModuleMetadata id="Native" order="LoadBeforeThis" version="v1.4.6.*" />
-    <DependedModuleMetadata id="SandBoxCore" order="LoadBeforeThis" version="v1.4.6.*" />
-    <DependedModuleMetadata id="Sandbox" order="LoadBeforeThis" version="v1.4.6.*" />
-    <DependedModuleMetadata id="StoryMode" order="LoadBeforeThis" version="v1.4.6.*" />
-    <DependedModuleMetadata id="CustomBattle" order="LoadBeforeThis" version="v1.4.6.*" optional="true" />
-    <DependedModuleMetadata id="Bannerlord.Harmony" order="LoadBeforeThis" version="v2.4.2.*" />
-    <DependedModuleMetadata id="Bannerlord.ButterLib" order="LoadBeforeThis" version="v2.10.4" />
-    <DependedModuleMetadata id="Bannerlord.UIExtenderEx" order="LoadBeforeThis" version="v2.13.2" />
-    <DependedModuleMetadata id="Bannerlord.MBOptionScreen" order="LoadBeforeThis" version="v5.11.4" />
+    <DependedModuleMetadata id="Native" order="LoadBeforeThis" />
+    <DependedModuleMetadata id="SandBoxCore" order="LoadBeforeThis" />
+    <DependedModuleMetadata id="Sandbox" order="LoadBeforeThis" />
+    <DependedModuleMetadata id="StoryMode" order="LoadBeforeThis" />
+    <DependedModuleMetadata id="CustomBattle" order="LoadBeforeThis" optional="true" />
+    <DependedModuleMetadata id="Bannerlord.Harmony" order="LoadBeforeThis" />
+    <DependedModuleMetadata id="Bannerlord.ButterLib" order="LoadBeforeThis" />
+    <DependedModuleMetadata id="Bannerlord.UIExtenderEx" order="LoadBeforeThis" />
+    <DependedModuleMetadata id="Bannerlord.MBOptionScreen" order="LoadBeforeThis" />
     <!-- WarSails / Naval DLC compatibility: load before this mod if present -->
-    <DependedModuleMetadata id="NavalDLC" order="LoadBeforeThis" version="v1.2.6.*" optional="true" />
+    <DependedModuleMetadata id="NavalDLC" order="LoadBeforeThis" optional="true" />
   </DependedModuleMetadatas>
 
   <SubModules>
     <SubModule>
       <Name value="Both Perks" />
-      <DLLName value="BothPerks.dll" />
-      <SubModuleClassType value="BothPerks.SubModule" />
+      <DLLName value="BothPerks.Bootstrap.dll" />
+      <SubModuleClassType value="BothPerks.Bootstrap.SubModule" />
       <Tags>
         <Tag key="DedicatedServerType" value="none" />
         <Tag key="IsNoRenderModeElement" value="false" />
