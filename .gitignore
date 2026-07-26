@@ -1,0 +1,24 @@
+# Build output. Builds are deterministic, so identical source reproduces these
+# byte for byte -- there is no reason to version them.
+bin/
+obj/
+obj2/
+obj_build/
+tempbuild/
+
+# Machine-specific paths. The real one lives in personalTooling\ModPaths.local.psd1.
+ModPaths.local.psd1
+
+# Decompiled game reference source -- read-only, never versioned.
+MB_source/
+
+# Editor / IDE
+.vs/
+.vscode/
+*.user
+*.suo
+UpgradeLog.htm
+
+# Windows / Nextcloud
+desktop.ini
+Thumbs.db
