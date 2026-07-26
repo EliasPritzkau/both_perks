@@ -1,13 +1,12 @@
 Build BothPerks from this module directory:
 
-  powershell -NoProfile -ExecutionPolicy Bypass -File .\BuildBothPerks.ps1
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\BuildBothPerks.ps1 -ReferenceVersion v1_4
 
 Output:
 
   .\bin\Win64_Shipping_Client\BothPerks.Bootstrap.dll
   .\bin\Win64_Shipping_Client\compat\v1_2\BothPerks.Core.dll
   .\bin\Win64_Shipping_Client\compat\v1_3\BothPerks.Core.dll
+  .\bin\Win64_Shipping_Client\compat\v1_4\BothPerks.Core.dll
 
-For clean Workshop packaging, run from the parent mods folder:
-
-  powershell -NoProfile -ExecutionPolicy Bypass -File .\BuildReleases.ps1 -ModName BothPerks
+For release packaging or local staging, run the scripts in ..\personalTooling.

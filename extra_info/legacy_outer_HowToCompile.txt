@@ -1,0 +1,2 @@
+$env:MSBuildSDKsPath="C:\Program Files\dotnet\sdk\9.0.202\Sdks" ; dotnet build both_perks/src/BothPerks.csproj -c Release /p:GameDir="F:\SteamLibrary\steamapps\common\Mount & Blade II Bannerlord\bin\Win64_Shipping_Client"
+

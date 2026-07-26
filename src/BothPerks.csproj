@@ -12,9 +12,9 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Optimize>true</Optimize>
     <BannerlordRoot Condition="'$(BannerlordRoot)'=='' and '$(BANNERLORD_ROOT)'!=''">$(BANNERLORD_ROOT)</BannerlordRoot>
-    <BannerlordRoot Condition="'$(BannerlordRoot)'==''">D:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord</BannerlordRoot>
+    <BannerlordRoot Condition="'$(BannerlordRoot)'==''">D:\BANNERLORDS\Mount &amp; Blade II Bannerlord</BannerlordRoot>
     <GameDir Condition="'$(GameDir)'==''">$(BannerlordRoot)\bin\Win64_Shipping_Client</GameDir>
-    <WorkshopDir Condition="'$(WorkshopDir)'==''">D:\SteamLibrary\steamapps\workshop\content\261550</WorkshopDir>
+    <WorkshopDir Condition="'$(WorkshopDir)'==''">C:\Program Files (x86)\Steam\steamapps\workshop\content\261550</WorkshopDir>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>

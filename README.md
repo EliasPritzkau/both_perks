@@ -18,9 +18,10 @@ Runtime layout:
 bin/Win64_Shipping_Client/BothPerks.Bootstrap.dll
 bin/Win64_Shipping_Client/compat/v1_2/BothPerks.Core.dll
 bin/Win64_Shipping_Client/compat/v1_3/BothPerks.Core.dll
+bin/Win64_Shipping_Client/compat/v1_4/BothPerks.Core.dll
 ```
 
-The bootstrap loads `v1_2` for Bannerlord 1.2.x and `v1_3` for 1.3+.
+The bootstrap loads `v1_2` for Bannerlord 1.2.x, `v1_3` for 1.3.x, and `v1_4` for 1.4+.
  
 What the mod does:
 - Gives heroes all perks they qualify for based on skill level, so they effectively get both perks in each skill tree.
@@ -44,8 +45,8 @@ Settings (in MCM):
   - XP model: both_perks/src/BothPerksXpModel.cs multiplies skill XP for in-scope heroes based on settings; injected by both_perks/src/SubModule.cs, which also attaches the campaign behavior and applies Harmony patches at load.
   - Docs/meta: both_perks/src/DESCRIPTION.txt (mod summary), extra_info/.tasks.md and extra_info/AGENTS.md (repo guidelines: don’t edit MBSource/Archive; target BL 1.3.6; MCM allowed).
 
-Clean Workshop packages are built from the parent mods folder with:
+Clean Workshop packages are built from `..\personalTooling` with:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\BuildReleases.ps1 -ModName BothPerks
+powershell -NoProfile -ExecutionPolicy Bypass -File ..\personalTooling\BuildReleases.ps1 -GameVersion v1_4 -ModName BothPerks
 ```

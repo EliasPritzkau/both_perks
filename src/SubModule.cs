@@ -87,6 +87,17 @@ namespace BothPerks
         public void OnGameStart(Game game, IGameStarter gameStarter)
         {
             TryAddBehavior(game, gameStarter, nameof(OnGameStart));
+            if (gameStarter is CampaignGameStarter starter)
+            {
+                try
+                {
+                    EnsureXpModel(starter);
+                }
+                catch (Exception ex)
+                {
+                    Debug.Print($"[BothPerks] OnGameStart.EnsureXpModel failed: {ex}");
+                }
+            }
         }
     }
 }

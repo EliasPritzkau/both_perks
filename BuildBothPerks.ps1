@@ -8,10 +8,11 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$pathsModule = Join-Path $PSScriptRoot 'tools\ModPaths.psm1'
+$modsRoot = Split-Path $PSScriptRoot -Parent
+$pathsModule = Join-Path $modsRoot 'personalTooling\tools\ModPaths.psm1'
 Import-Module -Name $pathsModule -Force
 if ([string]::IsNullOrWhiteSpace($ConfigPath)) {
-    $ConfigPath = Join-Path $PSScriptRoot 'ModPaths.local.psd1'
+    $ConfigPath = Join-Path $modsRoot 'personalTooling\ModPaths.local.psd1'
 }
 $config = Import-ModPaths -Path $ConfigPath
 $dotnet = Resolve-ConfiguredTool -Config $config -Name 'DotNet'

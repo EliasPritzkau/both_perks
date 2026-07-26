@@ -1,0 +1,25 @@
+
+<Tasks>
+  <CreateItem />
+  <UpdateItem>
+    <ModuleFolder Value="F:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\both_perks" />
+    <!-- A direct path of your module -->
+
+    <ItemDescription Value="automatically picks both perks for you and your family/companions" />
+    <!-- A description that will be displayed on Steam Workshop, can be edited via the Steam UI -->
+
+    <Tags>
+      <!-- Type / Setting / Game Mode / Version -->
+      <Tag Value="Utility" />
+      <Tag Value="Native" />
+      <Tag Value="Singleplayer" />
+      <Tag Value="v1.3.6" />
+    </Tags>
+
+    <Image Value="F:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\both_perks\both_perks_thubnail_steam.png" />
+    <!-- Featured image (should be < 1 MB) -->
+
+    <Visibility Value="Private" />
+    <!-- Can be: Public, FriendsOnly, Private -->
+  </UpdateItem>
+</Tasks>

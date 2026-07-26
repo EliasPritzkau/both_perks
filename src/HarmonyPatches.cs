@@ -128,6 +128,33 @@ namespace BothPerks
             return getIsPerkSelected != null;
         }
 
+        internal static Hero? GetSelectorHero(Func<PerkObject, bool>? getIsPerkSelected)
+        {
+            object? target = getIsPerkSelected?.Target;
+            if (target == null)
+            {
+                return null;
+            }
+
+            Hero? directHero = target.GetType().GetProperty("Hero", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                ?.GetValue(target, null) as Hero;
+            if (directHero != null)
+            {
+                return directHero;
+            }
+
+            Hero? developerHero = GetDeveloperHero(target);
+            if (developerHero != null)
+            {
+                return developerHero;
+            }
+
+            object? heroItem = target.GetType().GetField("_heroItem", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.GetValue(target);
+            return heroItem?.GetType().GetProperty("Hero", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                ?.GetValue(heroItem, null) as Hero;
+        }
+
         private static bool EnsureSelectionRefs()
         {
             if (_selectionRefsUnavailable)
@@ -459,7 +486,7 @@ namespace BothPerks
             try
             {
                 BothPerksSettings? settings = BothPerksSettings.Instance;
-                if (settings == null || settings.BehaviorMode != PerkBehaviorMode.Freedom)
+                if (settings == null)
                 {
                     return true;
                 }
@@ -475,6 +502,14 @@ namespace BothPerks
                 }
 
                 if (getIsPerkSelected == null || getIsPreviousSelected == null || setCurrentState == null)
+                {
+                    return true;
+                }
+
+                if (!PerkVm_HasAlternativeSelected_Patch.ShouldIgnoreAlternativeSelection(
+                        __instance,
+                        settings,
+                        getIsPerkSelected))
                 {
                     return true;
                 }
@@ -511,6 +546,8 @@ namespace BothPerks
     [HarmonyPatch(typeof(PerkVM), "get__hasAlternativeAndSelected")]
     internal static class PerkVm_HasAlternativeSelected_Patch
     {
+        private const string DoctorsOathStringId = "MedicineDoctorsOath";
+
         private static bool IsHeroInScope(Hero hero, PerkApplicationScope scope)
         {
             if (hero == null)
@@ -532,12 +569,58 @@ namespace BothPerks
             };
         }
 
+        private static bool IsDoctorsOath(PerkObject? perk)
+        {
+            return perk != null && perk.StringId == DoctorsOathStringId;
+        }
+
+        internal static bool ShouldIgnoreAlternativeSelection(
+            PerkVM instance,
+            BothPerksSettings settings,
+            Func<PerkObject, bool>? getIsPerkSelected)
+        {
+            if (settings == null || getIsPerkSelected == null)
+            {
+                return false;
+            }
+
+            PerkBehaviorMode mode = settings.BehaviorMode;
+            if (mode != PerkBehaviorMode.Freedom && mode != PerkBehaviorMode.Manual)
+            {
+                return false;
+            }
+
+            Hero? hero = PerkUiAccess.GetSelectorHero(getIsPerkSelected);
+            if (hero != null && !IsHeroInScope(hero, settings.Scope))
+            {
+                return false;
+            }
+
+            if (mode == PerkBehaviorMode.Freedom)
+            {
+                return true;
+            }
+
+            PerkObject? alternative = instance.Perk.AlternativePerk;
+            if (alternative == null)
+            {
+                return false;
+            }
+
+            if (settings.SkipDoctorsOath && (IsDoctorsOath(instance.Perk) || IsDoctorsOath(alternative)))
+            {
+                return false;
+            }
+
+            return getIsPerkSelected(alternative);
+        }
+
         public static bool Prefix(PerkVM __instance, ref bool __result)
         {
             try
             {
                 BothPerksSettings? settings = BothPerksSettings.Instance;
-                if (settings == null || settings.BehaviorMode != PerkBehaviorMode.Freedom)
+                if (settings == null)
                 {
                     return true;
                 }
@@ -547,15 +630,12 @@ namespace BothPerks
                     return true;
                 }
 
-                object? target = getIsPerkSelected?.Target;
-                Hero? hero = PerkUiAccess.GetDeveloperHero(target);
-
-                if (hero != null && !IsHeroInScope(hero, settings.Scope))
+                if (!ShouldIgnoreAlternativeSelection(__instance, settings, getIsPerkSelected))
                 {
                     return true;
                 }
 
-                // In freedom mode and in-scope: never report "alternative already selected".
+                // In unlocked modes and in-scope: never report "alternative already selected".
                 __result = false;
                 return false;
             }

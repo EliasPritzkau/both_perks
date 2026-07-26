@@ -17,7 +17,7 @@ namespace BothPerks
             }
 
             float multiplier = Math.Max(0.1f, settings.SkillXpMultiplier);
-            if (multiplier <= 1f)
+            if (Math.Abs(multiplier - 1f) < 0.0001f)
             {
                 return baseMultiplier;
             }
